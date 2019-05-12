@@ -1,0 +1,79 @@
+---
+title: "kcluster"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+#getting the data 
+data(wine, package="rattle.data")
+head(wine)
+
+#Standardizeing the data
+wine1<-scale(wine[,-1])
+
+#kmeans cluster data
+#method one
+library(NbClust)
+wssplot <- function(wine1, nc=15, seed=1234){
+	              wss <- (nrow(wine1)-1)*sum(apply(wine1,2,var))
+               	      for (i in 2:nc){
+		        set.seed(seed)
+	                wss[i] <- sum(kmeans(wine1, centers=i)$withinss)}
+	                
+		      plot(1:nc, wss, type="b", xlab="Number of Clusters",
+	                        ylab="Within groups sum of squares")
+	   }
+
+wssplot(wine1)
+
+```
+
+```{r pressure, echo=FALSE}
+#excercise 2
+#this method suggest that k=3, the inflection on the curve is the change from homogeneity to heterogeneity
+
+#method 2
+
+library(NbClust)
+set.seed(1234)
+nc <- NbClust(wine1, min.nc=2, max.nc=15, method="kmeans")
+barplot(table(nc$Best.n[1,]),
+	          xlab="Numer of Clusters", ylab="Number of Criteria",
+		            main="Number of Clusters Chosen by 26 Criteria")
+
+```
+Suggesting 3 clusters
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#excercise 4
+
+set.seed(234)
+fit.km <- kmeans(wine1, 3)
+
+
+# Exercise 5: using the table() function, show how the clusters in fit.km$clusters
+# compares to the actual wine types in wine$Type. Would you consider this a good
+# clustering?
+
+table(fit.km$cluster)
+table(wine$Type)
+
+# Exercise 6:
+# * Visualize these clusters using  function clusplot() from the cluster library
+# * Would you consider this a good clustering?
+
+library(cluster)
+
+
+clusplot(wine1,fit.km$cluster,shade=TRUE )
+
+```
+This is good clustering.
+
+
